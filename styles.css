@@ -1,0 +1,24 @@
+.block_activity_chooser .optionscontainer .option,
+.block_activity_chooser .searchresultitemscontainer .option {
+    flex-basis: 50%;
+    margin: 0 !important;
+}
+
+.block_activity_chooser .optionscontainer .option .optioninfo,
+.block_activity_chooser .searchresultitemscontainer .option .optioninfo {
+    flex-direction: row !important;
+    transform: scale(0.9);
+}
+
+.block_activity_chooser .optionscontainer .option .optioninfo .optionactions,
+.block_activity_chooser .searchresultitemscontainer .option .optioninfo .optionactions {
+    flex-direction: column !important;
+}
+
+.block_activity_chooser .nav.nav-tabs {
+    transform: scale(0.9);
+}
+
+.block_activity_chooser .nav-link {
+    padding: 10px;
+}
