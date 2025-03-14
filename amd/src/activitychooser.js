@@ -54,6 +54,9 @@ export const init = async (courseId, chooserConfig) => {
         };
     })();
 
+    // Grab the first section that has a data-sectionid attribute.
+    const caller = document.querySelector('.course-section[data-sectionid]');
+
     // We want to show the modal instantly but loading whilst waiting for our data.
     let bodyPromiseResolver;
     const bodyPromise = new Promise(resolve => {
@@ -76,14 +79,37 @@ export const init = async (courseId, chooserConfig) => {
         return;
     }
 
+    // Apply the section id to all the module instance links.
+    const builtModuleData = sectionIdMapper(data, caller.dataset.sectionid);
+
     bodyPromiseResolver(await Templates.render(
         'core_course/activitychooser',
-        templateDataBuilder(data.content_items, chooserConfig)
+        templateDataBuilder(builtModuleData, chooserConfig)
     ));
 
     initialized = true;
 
     pendingPromise.resolve();
+};
+
+/**
+ * Given the web service data and an ID we want to make a deep copy
+ * of the WS data then add on the section ID to the addoption URL
+ *
+ * @method sectionIdMapper
+ * @param {Object} webServiceData Our original data from the Web service call
+ * @param {Number} id The ID of the section we need to append to the links
+ * @param {Number|null} sectionreturnid The ID of the section return we need to append to the links
+ * @param {Number|null} beforemod The ID of the cm we need to append to the links
+ * @return {Array} [modules] with URL's built
+ */
+const sectionIdMapper = (webServiceData, id, sectionreturnid, beforemod) => {
+    // We need to take a fresh deep copy of the original data as an object is a reference type.
+    const newData = JSON.parse(JSON.stringify(webServiceData));
+    newData.content_items.forEach((module) => {
+        module.link += '&section=' + id + '&sr=' + (sectionreturnid ?? 0) + '&beforemod=' + (beforemod ?? 0);
+    });
+    return newData.content_items;
 };
 
 /**
@@ -183,13 +209,61 @@ const buildBlock = (bodyPromise) => {
     if (block) {
         // Now we can actually display the content.
         bodyPromise.then((html, js) => {
-            // let templateContext = {
-            //     classes: 'modchooser'
-            // };
-
-            // const {html} = Templates.renderForPromise('core_course/activitychooser', templateContext);
             let content = block.querySelector('#block-activity-chooser-content');
             content.innerHTML = html;
+
+            let options = block.querySelectorAll('.optioninfo a[data-action]');
+            options.forEach((option) => {
+                option.setAttribute('draggable', 'true');
+
+                option.addEventListener('drag', () => {
+                    option.classList.add('dragging');
+                });
+
+                option.addEventListener('dragend', () => {
+                    option.classList.remove('dragging');
+                });
+            });
+
+            let activities = document.querySelectorAll('.course-content .activity');
+            activities.forEach((activity) => {
+                activity.addEventListener('dragover', (e) => {
+                    let activeOption = block.querySelector('.optioninfo a.dragging');
+
+                    if (activeOption) {
+                        e.preventDefault();
+                        activity.classList.add('dd-drop-down');
+                    }
+                });
+
+                activity.addEventListener('dragleave', (e) => {
+                    let activeOption = block.querySelector('.optioninfo a.dragging');
+
+                    if (activeOption) {
+                        e.preventDefault();
+                        activity.classList.remove('dd-drop-down');
+                    }
+                });
+
+                activity.addEventListener('drop', (e) => {
+                    let activeOption = block.querySelector('.optioninfo a.dragging');
+
+                    if (activeOption) {
+                        e.preventDefault();
+
+                        let sectionId = activity.closest('.course-section').dataset.sectionid;
+
+                        let beforeMod = null;
+                        let nextActivity = activity.nextElementSibling;
+                        if (nextActivity) {
+                            beforeMod = nextActivity.dataset.id;
+                        }
+
+                        let url = activeOption.getAttribute('href') + '&section=' + sectionId + '&beforemod=' + beforeMod;
+                        window.location.href = url;
+                    }
+                });
+            });
 
             if (js) {
                 Templates.runTemplateJS(js);

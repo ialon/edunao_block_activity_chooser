@@ -1,3 +1,7 @@
+.editing #block-activity-chooser-content {
+    margin-top: 25px;
+}
+
 .block_activity_chooser .optionscontainer .option,
 .block_activity_chooser .searchresultitemscontainer .option {
     flex-basis: 50%;
@@ -12,7 +16,7 @@
 
 .block_activity_chooser .optionscontainer .option .optioninfo .optionactions,
 .block_activity_chooser .searchresultitemscontainer .option .optioninfo .optionactions {
-    flex-direction: column !important;
+    display: none !important;
 }
 
 .block_activity_chooser .nav.nav-tabs {
@@ -21,4 +25,36 @@
 
 .block_activity_chooser .nav-link {
     padding: 10px;
+}
+
+.block_activity_chooser .optioninfo a[data-action] {
+    cursor: grab;
+}
+
+.block_activity_chooser .optioninfo a {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.block_activity_chooser .optioninfo a:hover {
+    border: 1px solid #3784c9;
+}
+
+.block_activity_chooser .optioninfo a.dragging {
+    opacity: 0.5;
+}
+
+.block_activity_chooser .optioninfo a[data-action] img {
+    user-drag: none;
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.course-content li.activity.dd-drop-down {
+    border-bottom: 1px solid #1d2125;
+    margin-bottom: -1px;
 }
